@@ -1,0 +1,9 @@
+html {
+  scroll-behavior: smooth;
+  height: 100vh;
+}
+
+body {
+  min-width: 375px;
+  margin: 0;
+}
