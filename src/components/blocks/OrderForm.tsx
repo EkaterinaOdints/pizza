@@ -2,7 +2,9 @@ import { Box, Heading, Field, Input, Stack } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { useHookFormMask } from 'use-mask-input';
 import { useEffect } from 'react';
-import { useCart } from "@/components/context/context"
+import { useCart } from "@/components/context/context";
+
+import { DEFAULT_FORM_DATA } from "@/constants/constants";
 
 interface Props {
   description: string,
@@ -10,53 +12,29 @@ interface Props {
 
 const OrderForm = (props: Props) => {
   const { description } = props;
-  const { formData, setFormData, isOrderCleared, setOrderCleared, stepNumber, setFormValid, onFormSubmit } = useCart();
+  const { formData, setFormData, stepNumber, setFormValid } = useCart();
  
   const {
     register,
-    reset,
     getValues,
     formState: { errors, isValid },
   } = useForm({
     mode: "onChange",
-    defaultValues: formData || {
-      firstName: "",
-      phone: "",
-      address: "",
-      comments: "",
-    },
+    defaultValues: formData || { ...DEFAULT_FORM_DATA },
   });
 
   const registerWithMask = useHookFormMask(register);
   const getErrorMessage = (error?: any) => typeof error?.message === "string" ? error.message : null;
 
   useEffect(() => {
-    if (stepNumber === 1 && !isValid) {
-      setFormValid(false)
-    } else {
-      setFormValid(true)
+    if (stepNumber === 2) {
+      setFormData(getValues());
     }
   }, [stepNumber]);
 
   useEffect(() => {
-    if (stepNumber === 1) {
-      setFormValid(isValid)
-    }
-  }, [isValid]);
-
-  useEffect(() => {
-    if (isOrderCleared) {
-      reset();
-      const timerId = setTimeout(() => {
-        setOrderCleared(false);
-      }, 1000); 
-      return () => clearTimeout(timerId);
-    }
-  }, [isOrderCleared]);
-
-  useEffect(() => {
-    setFormData(getValues());
-  }, [onFormSubmit]);
+    setFormValid(isValid)
+  }, [isValid]);  
 
   return (
     <form>

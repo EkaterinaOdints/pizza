@@ -1,4 +1,6 @@
-export const topping = [
+import type { Product, Topping } from "@/types/types"
+
+export const topping: Topping[] = [
   { id: "mozzarellaCheese", name: "Сыр моцарелла", price: 50 },
   { id: "spicySauce", name: "Острый соус", price: 30 },
   { id: "olives", name: "Оливки", price: 40 },
@@ -34,7 +36,7 @@ export const topping = [
   { id: "lemon", name: "Лимон", price: 10 }
 ];
 
-export const products = [
+export const products: Product[] = [
   {
     id: "pepperoni",
     name: "Пепперони",

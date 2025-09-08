@@ -1,29 +1,23 @@
 import { createContext, ReactNode, useState, useEffect, useContext } from "react";
-import type { OrderProduct, FormData } from "@/types/types";
+import type { Product, FormData } from "@/types/types";
+import { LS_KEY, DEFAULT_FORM_DATA } from "@/constants/constants";
 
-const LS_ORDER_KEY = "order";
-const LS_FORM_KEY = "formData";
-const LS_STEP_KEY = "currentOrderStep";
 
 interface ContextType {
   stepNumber: number,
   setStep: React.Dispatch<React.SetStateAction<number>>,
 
-  addToCart: (item: OrderProduct) => void,
-  order: OrderProduct[],
+  addToCart: (item: Product) => void,
+  order: Product[],
   clearOrder: () => void,
-  isOrderCleared: boolean,
-  setOrderCleared: React.Dispatch<React.SetStateAction<boolean>>,
 
-  calcProductTotalPrice: (item: OrderProduct) => number,
+  calcProductTotalPrice: (item: Product) => number,
   totalPrice: number,
   
   formData: FormData,
   setFormData: React.Dispatch<FormData>,
   isFormValid: boolean,
   setFormValid: React.Dispatch<React.SetStateAction<boolean>>,
-  setOnFormSubmit: React.Dispatch<React.SetStateAction<boolean>>, 
-  onFormSubmit: boolean,
 }
 
 interface Props {
@@ -33,34 +27,36 @@ interface Props {
 const Context = createContext<ContextType | undefined>(undefined);
 
 const getFormData = (): FormData => {
-  const localStorageFormData = localStorage.getItem(LS_FORM_KEY);
+  const localStorageFormData = localStorage.getItem(LS_KEY.FORM);
 
-  return localStorageFormData ? JSON.parse(localStorageFormData) : {
-    firstName: "",
-    phone: "",
-    address: "",
-    comments: "",
-  };
+  return localStorageFormData ? JSON.parse(localStorageFormData) : { ...DEFAULT_FORM_DATA };
 }
 
-const getOrder = (): OrderProduct[] => {
-  const localStorageOrder = localStorage.getItem(LS_ORDER_KEY);
+const getOrder = (): Product[] => {
+  const localStorageOrder = localStorage.getItem(LS_KEY.ORDER);
 
   return localStorageOrder ? JSON.parse(localStorageOrder) : [];
 }
 
-const calcProductTotalPrice = (item: OrderProduct) => {
+const getStep = (): number => {
+  const localStorageStep = localStorage.getItem(LS_KEY.STEP);
+
+  return localStorageStep ? Number(localStorageStep) : 0;
+}
+
+const calcProductTotalPrice = (item: Product) => {
   let productPrice = 0;
+
   productPrice += item.price;
 
-  item.toppingList.forEach((topping) => {
+  item.toppingList?.forEach((topping) => {
     productPrice += topping.price;
   })
 
   return productPrice;
 }
 
-const calcTotalPrice = (order: OrderProduct[]) => {
+const calcTotalPrice = (order: Product[]) => {
   let price = 0;
 
   order.forEach((item) => {
@@ -71,72 +67,68 @@ const calcTotalPrice = (order: OrderProduct[]) => {
 }
 
 const updateLSFormData = (data: FormData) => {
-  localStorage.setItem(LS_FORM_KEY, JSON.stringify(data));
+  localStorage.setItem(LS_KEY.FORM, JSON.stringify(data));
 }
 
-const updateLSCart = (order: OrderProduct[]) => {
-  localStorage.setItem(LS_ORDER_KEY, JSON.stringify(order))
+const updateLSCart = (order: Product[]) => {
+  localStorage.setItem(LS_KEY.ORDER, JSON.stringify(order))
+}
+
+const updateLSStep = (step: number) => {
+  localStorage.setItem(LS_KEY.STEP, step.toString())
 }
 
 export const ContextProvider = (props: Props) => {
   const { children } = props;
 
   const [order, setOrder] = useState(getOrder());
+  const [stepNumber, setStep] = useState(getStep());
   const [totalPrice, setTotalPrice] = useState(0);
   const [formData, setFormData] = useState(getFormData());
-  const [isOrderCleared, setOrderCleared]  = useState(false);
-  const [isFormValid, setFormValid] = useState(true);
-  const [onFormSubmit, setOnFormSubmit] = useState(false);
-
-  const savedStep = localStorage.getItem(LS_STEP_KEY);
-  const initialStep = savedStep ? Number(savedStep) : 0;
-  const [stepNumber, setStep] = useState(initialStep);
+  const [isFormValid, setFormValid] = useState(false);
 
   useEffect(() => {
     setTotalPrice(calcTotalPrice(order));
   }, [order]);
 
   useEffect(() => {
-    if (onFormSubmit) {
-      updateLSFormData(formData);
-    }
+    updateLSFormData(formData);
   }, [formData]);
 
   useEffect(() => {
-    localStorage.setItem(LS_STEP_KEY, stepNumber.toString());
+    updateLSStep(stepNumber)
   }, [stepNumber]);
 
-  useEffect(() => {
-    if (isOrderCleared) {
-      setOrder([]);
-      updateLSCart([]);
-    }
-  }, [isOrderCleared]);
-
-  const updateCart = (newOrder: OrderProduct[]) => {
+  const updateCart = (newOrder: Product[]) => {
     setOrder(newOrder);
     updateLSCart(newOrder);
   };
 
-  const addToCart = (item: OrderProduct) => {
+  const addToCart = (item: Product) => {
     const newOrder = [...order, item];
     updateCart(newOrder);
   }
 
   const clearOrder = () => {
     updateCart([]);
-    setFormData({
-      firstName: "",
-      phone: "",
-      address: "",
-      comments: "",
-    });
-    setOrderCleared(true);
+    setFormData({ ...DEFAULT_FORM_DATA });
     setStep(0);
   }
 
   return (
-    <Context.Provider value={{stepNumber, setStep, addToCart, order, clearOrder, isOrderCleared, setOrderCleared, calcProductTotalPrice, totalPrice, formData, setFormData, isFormValid, setFormValid, setOnFormSubmit, onFormSubmit }}>
+    <Context.Provider value={{
+      stepNumber,
+      setStep,
+      addToCart,
+      order,
+      clearOrder,
+      calcProductTotalPrice,
+      totalPrice,
+      formData,
+      setFormData,
+      isFormValid,
+      setFormValid
+    }}>
       {children}
     </Context.Provider>
   )

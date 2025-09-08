@@ -2,15 +2,19 @@ import { Dialog, Portal, createOverlay, CloseButton, Checkbox, CheckboxGroup, Fi
 import { topping } from "@/mocks/products";
 import { useCart } from "@/components/context/context";
 import { useState } from "react";
-import type { Topping } from "@/types/types"
+import type { Topping, Product } from "@/types/types"
 
-export const Modal = createOverlay((props) => {
+interface Props {
+  product: Product
+}
+
+export const Modal = createOverlay((props: Props) => {
   const { product, ...rest } = props;
   const { addToCart } = useCart();
 
   const [selectedToppings, setSelectedToppings] = useState<Topping[]>([]);
 
-  const availableToppingList = topping.filter((item) => product.availableToppingIdList.includes(item.id));
+  const availableToppingList = topping.filter((item) => product.availableToppingIdList?.includes(item.id));
   const orderProduct = structuredClone(product);
   delete orderProduct.availableToppingIdList;
 
@@ -25,7 +29,7 @@ export const Modal = createOverlay((props) => {
   const onAddButtonClick = () => {
     orderProduct.toppingList = selectedToppings;
     addToCart(orderProduct);
-    Modal.close("a")
+    Modal.close("topping")
   }
 
   return (
@@ -34,7 +38,7 @@ export const Modal = createOverlay((props) => {
         <Dialog.Backdrop minWidth="375px" height="100%" />
         <Dialog.Positioner minWidth="375px" height="100%">
           <Dialog.Content>
-            <CloseButton position="absolute" top="0" right="0" onClick={() => Modal.close("a")} />
+            <CloseButton position="absolute" top="0" right="0" onClick={() => Modal.close("topping")} />
             <Dialog.Body spaceY="4">
               <Fieldset.Root>
                 <CheckboxGroup name="addIngredients" paddingRight="40px">
@@ -43,13 +47,13 @@ export const Modal = createOverlay((props) => {
                   </Fieldset.Legend>
                   <Fieldset.Content>
                     <For each={availableToppingList}>
-                      {(item) => (
+                      { (item) => (
                         <Checkbox.Root key={item.id} value={item.id} onCheckedChange={() => updateSelectedToppings(item)}>
                           <Checkbox.HiddenInput />
                           <Checkbox.Control />
                           <Checkbox.Label>{`${item.name} - ${item.price} руб.`}</Checkbox.Label>
                         </Checkbox.Root>
-                      )}
+                      ) }
                     </For>
                   </Fieldset.Content>
                 </CheckboxGroup>
