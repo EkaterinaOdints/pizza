@@ -1,10 +1,10 @@
 import "./app.css";
 import { ContextProvider } from "@/components/context/context";
-import { Toaster } from "@/components/ui/Toaster";
+import { Toaster } from "@/components/ui/toaster";
 import { Modal } from "@/components/ui/Modal";
 import { Box } from "@chakra-ui/react";
 import {
-  BrowserRouter,
+  HashRouter,
   Routes,
   Route
 } from 'react-router-dom';
@@ -17,7 +17,7 @@ import Cart from "@/components/layout/Cart";
 
 const App = () => {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <ContextProvider>
         <Box as="main">
           <Routes>
@@ -28,7 +28,7 @@ const App = () => {
         <Modal.Viewport />
         <Toaster />
       </ContextProvider>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
 

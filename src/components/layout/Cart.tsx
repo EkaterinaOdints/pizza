@@ -1,6 +1,6 @@
 import { Container, Box, Heading, VisuallyHidden, Button, ButtonGroup, Steps, Stack } from "@chakra-ui/react";
 import { useCart } from "@/components/context/context";
-import { toaster } from "@/components/ui/Toaster";
+import { toaster } from "@/components/ui/toaster";
 import { Link } from "react-router-dom";
 
 import OrderComposition from "@/components/blocks/OrderComposition";
